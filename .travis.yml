@@ -3,7 +3,7 @@ matrix:
     - os: osx
       osx_image: xcode10.2
       language: node_js
-      node_js: "10"
+      node_js: "12"
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
@@ -14,26 +14,42 @@ matrix:
 
 cache:
   directories:
-    - node_modules
+    - elm-stuff/build-artifacts
+    - elm-stuff/packages
+    - $HOME/.npm # https://stackoverflow.com/a/42523517/1148249
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
+
+before_install:
+  - |
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends software-properties-common && sudo dpkg --add-architecture i386 && curl -L https://dl.winehq.org/wine-builds/winehq.key > winehq.key && sudo apt-key add winehq.key && sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu && \
+    sudo apt-get update && \
+    sudo apt-get -y purge software-properties-common libdbus-glib-1-2 python3-dbus python3-gi python3-pycurl python3-software-properties && \
+    sudo apt-get install -y --no-install-recommends winehq-stable && \
+    # clean
+    sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo unlink winehq.key
+
+install:
+  - npm install
+  - npm install -g elm@0.19.0-bugfix6
+
+before_script:
+  - npm run electron:build
 
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      docker run --rm \
-        --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
-        -v ${PWD}:/project \
-        -v ~/.cache/electron:/root/.cache/electron \
-        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-        electronuserland/builder:wine \
-        /bin/bash -c "yarn --link-duplicates --pure-lockfile && yarn release --linux --win"
+      npm run electron:serve
     else
-      yarn release
+      npm run electron:serve
     fi
+
 before_cache:
   - rm -rf $HOME/.cache/electron-builder/wine
 
 branches:
   except:
     - "/^v\\d+\\.\\d+\\.\\d+$/"
+
+notifications:
+  email: false
