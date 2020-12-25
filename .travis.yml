@@ -10,8 +10,6 @@ cache:
 script:
   - npm install
   - npm run electron:build
-  - cd dist_electron
-  - cd win-unpacked
 
 branches:
   except:

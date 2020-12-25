@@ -4,7 +4,7 @@ module.exports = {
             builderOptions: {
                 productName: "Ping",
                 appId: "com.lucid.ping",
-                icon: "./logo.ico"
+                // icon: "./logo.ico"
             }
         }
     }
