@@ -3,7 +3,7 @@
 <img src="./src/assets/logo.png" width="200">
 </p>
 
-## Proxy testing made easy.
+<h2 align="center">Proxy testing made easy.</h2>
 
 
 ![](src/assets/ping.jpg)
