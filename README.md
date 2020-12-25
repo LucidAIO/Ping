@@ -5,6 +5,7 @@
 
 <h2 align="center">Proxy testing made easy.</h2>
 
+![](https://img.shields.io/travis/jakerieger/Ping?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/jakerieger/Ping?style=for-the-badge)
 ![](https://img.shields.io/github/license/jakerieger/Ping?style=for-the-badge)
 ![](https://img.shields.io/github/stars/jakerieger/Ping?style=for-the-badge)
