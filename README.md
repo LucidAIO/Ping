@@ -1,16 +1,17 @@
 # Ping
-<div style="text-align: center;">
+<p align="center">
 <img src="./src/assets/logo.png" width="200">
+</p>
 
 ## Proxy testing made easy.
-</div>
+
 
 ![](src/assets/ping.jpg)
 
 Ping is a simple desktop application for testing HTTP/S and user authenticated proxies.
 
 ## Download
-You can download the latest windows binaries on our releases page or build the source code yourself.
+You can download the latest windows binaries on our [releases](/releases) page or build the source code yourself.
 
 ## Build
 You'll need NodeJS installed on your computer and accessible in your command line. _(Note: you can run Ping on Windows, macOS, or Linux if you're building from the source.)_
