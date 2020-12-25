@@ -11,7 +11,7 @@
 Ping is a simple desktop application for testing HTTP/S and user authenticated proxies.
 
 ## Download
-You can download the latest windows binaries on our [releases](/releases) page or build the source code yourself.
+You can download the latest windows binaries on our [releases](https://github.com/jakerieger/Ping/releases) page or build the source code yourself.
 
 ## Build
 You'll need NodeJS installed on your computer and accessible in your command line. _(Note: you can run Ping on Windows, macOS, or Linux if you're building from the source.)_
