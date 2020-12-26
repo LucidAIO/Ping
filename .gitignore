@@ -1,6 +1,5 @@
 .DS_Store
 node_modules
-/dist
 
 
 # local env files
@@ -24,3 +23,7 @@ pnpm-debug.log*
 
 #Electron-builder output
 /dist_electron
+
+working_proxies.txt
+
+yarn.lock

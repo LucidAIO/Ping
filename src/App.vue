@@ -3,14 +3,13 @@
     <Titlebar/>
     <div class="ui">
       <div class="box">
-        <b-field class="field" label="Destination URL:">
-          <b-input v-model="destURL"></b-input>
-        </b-field>
+        <b-input v-model="destURL" placeholder="Destination URL"></b-input>
       </div>
       <div class="table-container">
         <table v-if="proxies.length > 0" class="table">
           <thead>
             <tr>
+              <th></th>
               <th>Host</th>
               <th>Port</th>
               <th>Username</th>
@@ -21,14 +20,16 @@
           </thead>
           <tbody>
             <tr v-for="proxy in proxies" v-bind:key="proxy.id">
+              <td></td>
               <td>{{proxy.host}}</td>
               <td>{{proxy.port}}</td>
               <td>{{proxy.user}}</td>
               <td>{{proxy.pass}}</td>
-              <td v-if="proxy.status == 'OK'" style="color:#48C774">{{proxy.status}}</td>
+              <td v-if="proxy.status == 'OK'" style="color:#00cc68">{{proxy.status}}</td>
               <td v-else style="color:#FF3860">{{proxy.status}}</td>
               <td v-if="proxy.response > 2000" style="color:#FFDD57">{{proxy.response}}ms</td>
               <td v-else-if="proxy.response > 0">{{proxy.response}}ms</td>
+              <td v-else-if="proxy.response == 'ERROR'" style="color:#FF3860">{{proxy.response}}</td>
               <td v-else></td>
             </tr>
           </tbody>
@@ -68,7 +69,7 @@
             </header>
             <section class="modal-card-body">
               <div class="field">
-                <button @click="importProxiesFromFile()" class="button is-primary">Import From File</button>
+                <button @click="importProxiesFromFile()" class="button is-primary" disabled>Import From File</button>
               </div>
               <label class="label">OR</label>
               <b-field>
@@ -86,6 +87,7 @@
 
 <script>
 import Titlebar from './components/Titlebar.vue'
+import './assets/overrides.css'
 
 export default {
   components: {
@@ -150,14 +152,19 @@ export default {
           })
           for(let p in working_proxies) {
             if (working_proxies[p].user != undefined) {
-              let line = `http://${working_proxies[p].user}:${working_proxies[p].pass}@${working_proxies[p].host}:${working_proxies[p].port}`
+              let line = `${working_proxies[p].host}:${working_proxies[p].port}:${working_proxies[p].user}:${working_proxies[p].pass}`
               file.write(line + '\n')
             } else {
-              let line = `http://${working_proxies[p].host}:${working_proxies[p].port}`
+              let line = `${working_proxies[p].host}:${working_proxies[p].port}`
               file.write(line + '\n')
             }
           }
           file.end()
+          this.$buefy.toast.open({
+            message: 'Exported working proxies to <b>working_proxies.txt</b>',
+            type: 'is-success',
+            position: 'is-top'
+          })
         }
       })
       else {
@@ -165,6 +172,7 @@ export default {
       }
     },
 
+    // TODO: figure out a way to stop testing while it's still going
     async testProxies() {
       var self = this
       var startTime = new Date().getTime()
@@ -186,39 +194,113 @@ export default {
       }
 
       async function runTest() {
-        const request = window.require('request')
+        var tunnel = window.require('tunnel')
+        var http = window.require('http')
+        var https = window.require('https') // im pretty sure i can use HTTPS for both HTTP/HTTPS requests but idk
+        var hostProtocol = self.destURL.split(':')[0]
 
+        // this is really ugly. I know it and you know it. - TODO: refactor
         for await(let x of asyncRunProxyTest) {
-          request({
-            url: self.destURL,
-            method: 'GET',
-            headers: {'Cache-Control' : 'no-cache'},
-            proxy: `http://${self.proxies[x].host}:${self.proxies[x].port}`,
-            timeout: 10000
-          }, function (err, res) {
-            if (err) { 
-              let time = new Date().getTime()
-              self.proxies.splice(x, 1, {
-                host: self.proxies[x].host,
-                port: self.proxies[x].port,
-                user: self.proxies[x].user,
-                pass: self.proxies[x].pass,
-                status: 'Failed',
-                response: time - startTime
-              })
-              return
-            }
-            if (res.statusCode === 200) {
-              let time = new Date().getTime()
-              self.proxies.splice(x, 1, {
-                host: self.proxies[x].host,
-                port: self.proxies[x].port,
-                user: self.proxies[x].user,
-                pass: self.proxies[x].pass,
-                status: 'OK',
-                response: time - startTime
+          if (self.cancelTest) {console.log('cancelled!'); return}
+          var tunnelingAgent
+
+          if (hostProtocol == 'http') {
+            if (self.proxies[x].user != undefined && self.proxies[x].pass != undefined) {
+              tunnelingAgent = tunnel.httpOverHttp({
+                proxy: {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  proxyAuth: `${self.proxies[x].user}:${self.proxies[x].pass}`
+                }
               })
             } else {
+              tunnelingAgent = tunnel.httpOverHttp({
+                proxy: {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port
+                }
+              })
+            }
+
+            http.get(self.destURL, {
+              agent: tunnelingAgent
+            }, (res) => {
+              if (res.statusCode == 200) {
+                let time = new Date().getTime()
+                self.proxies.splice(x, 1, {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  user: self.proxies[x].user,
+                  pass: self.proxies[x].pass,
+                  status: 'OK',
+                  response: time - startTime
+                })
+              } else {
+                let time = new Date().getTime()
+                self.proxies.splice(x, 1, {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  user: self.proxies[x].user,
+                  pass: self.proxies[x].pass,
+                  status: 'Failed',
+                  response: time - startTime
+                })
+                return
+              }
+            }).on('error', () => {
+              self.proxies.splice(x, 1, {
+                host: self.proxies[x].host,
+                port: self.proxies[x].port,
+                user: self.proxies[x].user,
+                pass: self.proxies[x].pass,
+                status: 'Failed',
+                response: 'ERROR'
+              })
+            })
+
+          } else {
+            if (self.proxies[x].user != undefined && self.proxies[x].pass != undefined) {
+              tunnelingAgent = tunnel.httpsOverHttps({
+                proxy: {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  proxyAuth: `${self.proxies[x].user}:${self.proxies[x].pass}`
+                }
+              })
+            } else {
+              tunnelingAgent = tunnel.httpsOverHttps({
+                proxy: {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port
+                }
+              })
+            }
+
+            https.get(self.destURL, {
+              agent: tunnelingAgent
+            }, (res) => {
+              if(res.statusCode == 200) {
+                let time = new Date().getTime()
+                self.proxies.splice(x, 1, {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  user: self.proxies[x].user,
+                  pass: self.proxies[x].pass,
+                  status: 'OK',
+                  response: time - startTime
+                })
+              } else {
+                let time = new Date().getTime()
+                self.proxies.splice(x, 1, {
+                  host: self.proxies[x].host,
+                  port: self.proxies[x].port,
+                  user: self.proxies[x].user,
+                  pass: self.proxies[x].pass,
+                  status: 'Failed',
+                  response: time - startTime
+                })
+              }
+            }).on('error', () => {
               let time = new Date().getTime()
               self.proxies.splice(x, 1, {
                 host: self.proxies[x].host,
@@ -228,275 +310,12 @@ export default {
                 status: 'Failed',
                 response: time - startTime
               })
-            }
-          })
+            })
+          }
         }
       }
-
       runTest()
     }
   }
 }
 </script>
-
-<style>
-/* BULMA STYLE OVERRIDES */
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300&display=swap');
-
-body, html {
-  overflow: hidden !important;
-  background: #1c202b !important;
-  color: #fff !important;
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
-  font-family: 'Nunito Sans', sans-serif !important;
-}
-
-.ui {
-  margin: 30px;
-}
-
-button, input, textarea {
-  font-family: 'Nunito Sans', sans-serif !important;
-  -webkit-app-region: none;
-}
-
-input, textarea, h1, h2, h3, h4, h5, h6, .field, label, .box {
-  background: #1c202b !important;
-  color: #fff !important;
-}
-
-.card {
-  background: #0a0b1d !important;
-}
-
-.card-header, .card-header-title {
-  background: #7957d5 !important;
-}
-
-.modal:focus {
-  outline: none !important;
-}
-
-.modal-card-body {
-  background: #1c202b !important;
-  color: #fff !important;
-}
-
-.modal-card-title {
-  color: #fff !important;
-}
-
-.modal-card-head {
-  background: #181c25 !important;
-  border-bottom: none !important;
-}
-
-.modal-card-foot {
-  background: #181c25 !important;
-  border-top: none !important;
-}
-
-.panel-block:not(:last-child) {
-  border-bottom: none !important;
-}
-
-input {
-  font-size: 14pt !important;
-}
-
-input, textarea {
-  border-color: #494e54 !important;
-}
-
-input::placeholder, textarea::placeholder {
-  color: #fff !important;
-  opacity: 0.2 !important;
-}
-
-.nav {
-  -webkit-app-region: none !important;
-}
-
-.panel, .card, .box {
-  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.8), 0 0px 0 1px rgba(10, 10, 10, 0.03) !important;
-}
-
-.panel a {
-  color: #fff;
-}
-
-.snackbar, .snackbar button {
-  background: #0a0b1d !important;
-  -webkit-app-region: none !important;
-}
-
-svg {
-  margin-right: 5px;
-}
-
-a, button, .box {
-  -webkit-app-region: none !important;
-}
-
-textarea:focus {
-  outline: none;
-}
-
-.is-dark {
-  background: #0a0b1d !important;
-}
-
-/* TABLE STYLE RESET */
-.clear-user-agent-styles table,
-.clear-user-agent-styles thead,
-.clear-user-agent-styles tbody,
-.clear-user-agent-styles tfoot,
-.clear-user-agent-styles tr,
-.clear-user-agent-styles th,
-.clear-user-agent-styles td {
-    display: block;
-    width: auto;
-    height: auto;
-    margin: 0;
-    padding: 0;
-    border: none;
-    text-align: left;
-    font-weight: inherit;
-    -webkit-border-horizontal-spacing: 0;
-    -webkit-border-vertical-spacing: 0;
-}
-/*  */
-
-th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #33394d !important;
-  height: 30px;
-  padding: 0px 0 0px 10px;
-  color: #fff !important;
-}
-
-table {
-  width: 100%;
-  text-align: center;
-  border-collapse: separate !important;
-  border-spacing: 0px 4px !important;
-  -webkit-app-region: none !important;
-}
-
-.table {
-  background: none !important;
-  color: #fff !important;
-  padding-right: 10px;
-}
-
-tr {
-  background: none !important;
-}
-
-td {
-  padding: 0px 0px 0px 10px !important;
-  background:#292e3d;
-  border: none !important;
-  height: 40px;
-  line-height: 40px;
-}
-
-th {
-  border: none !important;
-  border-radius: 0 !important;
-}
-
-tr td:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-
-tr td:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-tr th:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-
-tr th:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.table-container {
-  min-height: 64vh !important;
-  max-height: 64vh !important;
-  overflow-y: auto !important;
-  -webkit-app-region: none !important;
-}
-
-.toolbar {
-  width: 100%;
-}
-
-.button span {
-  margin-right: 6px !important;
-}
-
-.title {
-  font-weight: 300 !important;
-}
-
-@keyframes blink {
-  0% {
-    opacity: 0.2;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.2;
-  }
-}
-
-.loading {
-  font-size: 12pt;
-  width: 40px;
-  display: inline-block;
-  text-align: center;
-  /* padding-bottom: 12px; */
-}
-
-.loading span {
-  animation-name: blink;
-  animation-duration: 1.4s;
-  animation-iteration-count: infinite;
-  animation-fill-mode: both;
-}
-
-.loading span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loading span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-::-webkit-scrollbar {
-  width: 0.8em;
-}
-
-::-webkit-scrollbar-track {
-  background: none;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #7957d5;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-corner {
-  display: none;
-}
-</style>

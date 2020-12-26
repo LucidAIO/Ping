@@ -33,14 +33,13 @@ export default {
 <style scoped>
 .titlebar {
     height: 30px;
-    background: #0a0b1d;
     margin-bottom: 10px;
 }
 
 .titlebar img {
     position: absolute;
     left: 8px;
-    top: 5px;
+    top: 7px;
 }
 
 .titlebar button {
@@ -62,7 +61,7 @@ export default {
 }
 
 .titlebar-btns button:hover {
-    background: #101230;
+    background: #3a4155;
 }
 
 #quit-app:hover {

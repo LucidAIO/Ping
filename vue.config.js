@@ -4,7 +4,12 @@ module.exports = {
             builderOptions: {
                 productName: "Ping",
                 appId: "com.lucid.ping",
-                // icon: "./logo.ico"
+                // icon: "./logo.ico",
+                // linux: {
+                //     icon: "./logo.png"
+                // },
+                asar: false,
+                nodeIntegration: true
             }
         }
     }

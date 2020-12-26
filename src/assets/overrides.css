@@ -1,0 +1,256 @@
+/* BULMA STYLE OVERRIDES */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300&display=swap');
+
+body, html {
+  overflow: hidden !important;
+  background: #12141b !important;
+  color: #fff !important;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  font-family: 'Nunito Sans', sans-serif !important;
+}
+
+.ui {
+  margin: 30px;
+}
+
+button, input, textarea {
+  font-family: 'Nunito Sans', sans-serif !important;
+  -webkit-app-region: none;
+}
+
+input, textarea, h1, h2, h3, h4, h5, h6, .field, label, .box {
+  background: #1c202b !important;
+  color: #fff !important;
+}
+
+.card {
+  background: #0a0b1d !important;
+}
+
+.card-header, .card-header-title {
+  background: #7957d5 !important;
+}
+
+.modal:focus {
+  outline: none !important;
+}
+
+.modal-card-body {
+  background: #1c202b !important;
+  color: #fff !important;
+}
+
+.modal-card-title {
+  color: #fff !important;
+}
+
+.modal-card-head {
+  background: #181c25 !important;
+  border-bottom: none !important;
+}
+
+.modal-card-foot {
+  background: #181c25 !important;
+  border-top: none !important;
+}
+
+.panel-block:not(:last-child) {
+  border-bottom: none !important;
+}
+
+input {
+  font-size: 14pt !important;
+}
+
+input, textarea {
+  border-color: #343a4b !important;
+  background: none !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #fff !important;
+  opacity: 0.2 !important;
+}
+
+.nav {
+  -webkit-app-region: none !important;
+}
+
+.panel, .card, .box {
+  /* box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.8), 0 0px 0 1px rgba(10, 10, 10, 0.03) !important; */
+}
+
+.panel a {
+  color: #fff;
+}
+
+.snackbar, .snackbar button {
+  background: #0a0b1d !important;
+  -webkit-app-region: none !important;
+}
+
+svg {
+  margin-right: 5px;
+}
+
+a, button, .box {
+  -webkit-app-region: none !important;
+}
+
+input:focus, textarea:focus {
+  outline: none !important;
+}
+
+.is-dark {
+  background: #0a0b1d !important;
+}
+
+/* TABLE STYLE RESET */
+.clear-user-agent-styles table,
+.clear-user-agent-styles thead,
+.clear-user-agent-styles tbody,
+.clear-user-agent-styles tfoot,
+.clear-user-agent-styles tr,
+.clear-user-agent-styles th,
+.clear-user-agent-styles td {
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    text-align: left;
+    font-weight: inherit;
+    -webkit-border-horizontal-spacing: 0;
+    -webkit-border-vertical-spacing: 0;
+}
+/*  */
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0d0e14 !important;
+  height: 30px;
+  padding: 0px 0 0px 10px;
+  color: #fff !important;
+}
+
+table {
+  width: 100%;
+  text-align: left;
+  border-collapse: separate !important;
+  border-spacing: 0px 4px !important;
+  -webkit-app-region: none !important;
+}
+
+.table {
+  background: none !important;
+  color: #fff !important;
+  padding-right: 10px;
+}
+
+tr {
+  background: none !important;
+}
+
+td {
+  padding: 0px 0px 0px 10px !important;
+  background:#20242f;
+  border: none !important;
+  height: 40px;
+  line-height: 40px;
+}
+
+th {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.table-container {
+  min-height: 65vh !important;
+  max-height: 65vh !important;
+  overflow-y: auto !important;
+  -webkit-app-region: none !important;
+}
+
+.toolbar {
+  width: 100%;
+}
+
+.button span {
+  margin-right: 6px !important;
+}
+
+.title {
+  font-weight: 300 !important;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.loading {
+  font-size: 12pt;
+  width: 40px;
+  display: inline-block;
+  text-align: center;
+  /* padding-bottom: 12px; */
+}
+
+.loading span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.loading span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+::-webkit-scrollbar {
+  width: 0.6em;
+}
+
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00cc68;
+  /* border-radius: 10px; */
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
+.button.is-primary {
+  background: #0a0b0f !important;
+  border-bottom: 2px solid #00cc68 !important;
+  /* background: #00cc68 !important; */
+}
+
+input, textarea, .field, .label {
+  background: none !important;
+}
+
+.box {
+  background: #1c1f29 !important;
+  border-radius: 0 !important;
+  /* background: linear-gradient(to bottom, #3a4475, #22264e) !important; */
+}
