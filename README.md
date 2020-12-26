@@ -14,6 +14,9 @@
 
 Ping is a simple desktop application for testing HTTP/S and user authenticated proxies.
 
+## Why use Ping?
+Unlike other proxy testing programs like FOGLDN ProxyTester, Ping runs tests asynchronously allowing you to run thousands of tests in a matter of seconds.
+
 ## Download
 You can download the latest windows binaries on our [releases](https://github.com/jakerieger/Ping/releases) page or build the source code yourself.
 
